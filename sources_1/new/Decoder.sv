@@ -1,7 +1,8 @@
 `timescale 1ns / 1ps
 
 module Decoder(
-    input logic [31:0] inst
+    input logic [31:0] inst,
+    output logic isALUreg, regWrite
 );
 
     localparam len = 6;
@@ -16,5 +17,7 @@ module Decoder(
     logic isLoad   =  (instr[len:0] == 7'b0000011); // rd <- mem[rs1+Iimm]
     logic isStore  =  (instr[len:0] == 7'b0100011); // mem[rs1+Simm] <- rs2
     logic isSYSTEM =  (instr[len:0] == 7'b1110011); // special
+
+    assign regWrite = isALUreg || isALUimm || isLoad || isLUI || isAUIPC || isJAL || isJALR;
 
 endmodule
