@@ -19,8 +19,7 @@ module AluDecoder(
             3'b111: aluControl <= 4'h9;
         endcase
         case(funct3)
-            3'b001: 
-            3'b101: isShamt <= 1'b1;
+            3'b001, 3'b101: isShamt <= 1'b1;
             default: isShamt <= 1'b0;
         endcase
     end
