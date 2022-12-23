@@ -1,13 +1,13 @@
 
 module Datapath(
     input logic clk, reset,
-    input logic isALUreg, regWrite, isJAL, isJALR, isBranch,
+    input logic isALUreg, regWrite, isJAL, isJALR, isBranch, isLUI, isAUIPC,
     input logic [3:0] aluControl,
     input logic [31:0] instr,
     output logic [31:0] pc, aluOut,
     output logic isZero
 );
-    logic [31:0] pcNext, pcplus4, aluIn1, aluIn2, aluIn2Pre, rd2;
+    logic [31:0] pcNext, pcplus4, aluIn1, aluIn2, aluIn2Pre, rd1, rd2, wd3;
 
     logic [4:0] rs1Id = instr[19:15];
     logic [4:0] rs2Id = instr[24:20];
@@ -29,15 +29,25 @@ module Datapath(
     // mux here? to select either PC or JUMP
     // also compute the BRANCH and JUMP addresses, TODO (see how is it done in the guide first)
 
-    RegisterFile reg(clk, regWrite, rs1Id, rs2Id, rdId, wd3, aluIn1, rd2);
+    RegisterFile reg(clk, regWrite, rs1Id, rs2Id, rdId, wd3, rd1, rd2);
 
     Alu alu(aluControl, aluIn1, aluIn2, aluOut, isZero);
 
-    assign aluIn2Pre = isALUreg ? rd2 : Iimm;
+    assign aluIn1 = (isJAL || isAUIPC) ? pc : rd1;
+    assign aluIn2Pre = (isALUreg | isBranch) ? rd2 : 
+                       isJAL ? Jimm : 
+                       isAUIPC ? Uimm : 
+                       Iimm;
     assign aluIn2 = isShamt ? shamt : aluIn2Pre;
 
-    assign pcNext = isJAL  ? pc + Jimm :
-                    isJALR ? aluIn1 + Iimm :
+    assign pcNext = (isBranch && ~isZero) ? (pc + Bimm) :
+                    isJAL  ? aluOut :
+                    isJALR ? {aluOut[31:1],1'b0}:
                     pcplus4;
+
+    assign wd3 = (isJAL || isJALR) ? pcplus4 :
+                 isLUI ? Uimm :
+                 isAUIPC ? aluOut : 
+                 aluOut;
 
 endmodule

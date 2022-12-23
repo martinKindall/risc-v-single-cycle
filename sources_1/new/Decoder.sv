@@ -2,7 +2,7 @@
 
 module Decoder(
     input logic [31:0] inst,
-    output logic isALUreg, regWrite, isJAL, isJALR, isBranch
+    output logic isALUreg, regWrite, isJAL, isJALR, isBranch, isLUI, isAUIPC, isALUimm, isJAL
 );
 
     localparam len = 6;
