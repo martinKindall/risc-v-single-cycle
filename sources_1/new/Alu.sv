@@ -18,6 +18,10 @@ module Alu(
             4'h7: aluOut <= op1 >> op2;
             4'h8: aluOut <= op1 | op2;
             4'h9: aluOut <= op1 & op2;
+            4'ha: aluOut <= op1 == op2;
+            4'hb: aluOut <= op1 != op2;
+            4'hc: aluOut <= $signed(op1) >= $signed(op2);
+            4'hd: aluOut <= op1 >= op2;
             default: aluOut <= 31'b0;
         endcase
 

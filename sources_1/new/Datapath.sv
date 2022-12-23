@@ -1,13 +1,13 @@
 
 module Datapath(
     input logic clk, reset,
-    input logic isALUreg, regWrite,
+    input logic isALUreg, regWrite, isJAL, isJALR, isBranch,
     input logic [3:0] aluControl,
     input logic [31:0] instr,
     output logic [31:0] pc, aluOut,
     output logic isZero
 );
-    logic [31:0] pcnext, pcplus4, aluIn1, aluIn2, aluIn2Pre, rd2;
+    logic [31:0] pcNext, pcplus4, aluIn1, aluIn2, aluIn2Pre, rd2;
 
     logic [4:0] rs1Id = instr[19:15];
     logic [4:0] rs2Id = instr[24:20];
@@ -24,7 +24,7 @@ module Datapath(
 
     logic [4:0] shamt = isALUreg ? rd2[4:0] : instr[24:20];
 
-    FlopR pcreg(clk, reset, pcnext, pc);
+    FlopR pcreg(clk, reset, pcNext, pc);
     Adder pcadd1(pc, 32'b100, pcplus4);
     // mux here? to select either PC or JUMP
     // also compute the BRANCH and JUMP addresses, TODO (see how is it done in the guide first)
@@ -35,5 +35,9 @@ module Datapath(
 
     assign aluIn2Pre = isALUreg ? rd2 : Iimm;
     assign aluIn2 = isShamt ? shamt : aluIn2Pre;
+
+    assign pcNext = isJAL  ? pc + Jimm :
+                    isJALR ? aluIn1 + Iimm :
+                    pcplus4;
 
 endmodule

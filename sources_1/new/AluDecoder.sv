@@ -2,13 +2,13 @@
 module AluDecoder(
     input logic [2:0] funct3,
     input logic [6:0] funct7,
-    input logic instr_5,
+    input logic instr_5, isBranch,
     output logic [3:0] aluControl,
     output logic isShamt
 );
 
     always_comb begin
-        case(funct3)
+        case(funct3 & ~isBranch)
             3'b000: aluControl <= (funct7[5] & instr_5) ? (4'h1) : (4'h0);
             3'b001: aluControl <= 4'h2;
             3'b010: aluControl <= 4'h3;
@@ -18,9 +18,18 @@ module AluDecoder(
             3'b110: aluControl <= 4'h8;
             3'b111: aluControl <= 4'h9;
         endcase
-        case(funct3)
+        case(funct3 & ~isBranch)
             3'b001, 3'b101: isShamt <= 1'b1;
             default: isShamt <= 1'b0;
+        endcase
+        case(funct3 & isBranch)
+            3'b000: aluControl <= 4'ha;
+            3'b001: aluControl <= 4'hb;
+            3'b100: aluControl <= 4'h3;
+            3'b101: aluControl <= 4'hc;
+            3'b110: aluControl <= 4'h4;
+            3'b111: aluControl <= 4'hd;
+            default: aluControl <= 4'hf;   // undefined
         endcase
     end
 
