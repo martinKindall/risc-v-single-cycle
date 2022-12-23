@@ -2,7 +2,7 @@
 module AluDecoder(
     input logic [2:0] funct3,
     input logic [6:0] funct7,
-    input logic instr_5, isBranch, isALUreg, isAUIPC, isALUimm, isJAL,
+    input logic instr_5, isBranch, isALUreg, isAUIPC, isALUimm, isJAL
     output logic [3:0] aluControl,
     output logic isShamt
 );
@@ -23,7 +23,7 @@ module AluDecoder(
             5'b10101: aluControl <= 4'hc;
             5'b10110: aluControl <= 4'h4;
             5'b10111: aluControl <= 4'hd;
-            default: aluControl <= 4'h0;   // adds by default
+            default: aluControl <= 4'hf;   // undefined
         endcase
         case({isALUreg || isALUimm, funct3})
             4'b1001, 4'b1101: isShamt <= 1'b1;

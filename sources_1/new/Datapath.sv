@@ -7,7 +7,7 @@ module Datapath(
     output logic [31:0] pc, aluOut,
     output logic isZero
 );
-    logic [31:0] pcNext, pcplus4, aluIn1, aluIn2, aluIn2Pre, rd1, rd2, wd3;
+    logic [31:0] pcNext, pcplus4, pcplusImm, aluIn1, aluIn2, aluIn2Pre, rd1, rd2, wd3;
 
     logic [4:0] rs1Id = instr[19:15];
     logic [4:0] rs2Id = instr[24:20];
@@ -33,21 +33,22 @@ module Datapath(
 
     Alu alu(aluControl, aluIn1, aluIn2, aluOut, isZero);
 
-    assign aluIn1 = (isJAL || isAUIPC) ? pc : rd1;
+    assign pcplusImm = pc + (instr[3] ? Jimm[31:0] :
+                             instr[4] ? Uimm[31:0] :
+                             Bimm[31:0]);
+
+    assign aluIn1 = rd1;
     assign aluIn2Pre = (isALUreg | isBranch) ? rd2 : 
-                       isJAL ? Jimm : 
-                       isAUIPC ? Uimm : 
                        Iimm;
     assign aluIn2 = isShamt ? shamt : aluIn2Pre;
 
-    assign pcNext = (isBranch && ~isZero) ? (pc + Bimm) :
-                    isJAL  ? aluOut :
+    assign pcNext = (isBranch && ~isZero || isJAL) ? pcplusImm :
                     isJALR ? {aluOut[31:1],1'b0}:
                     pcplus4;
 
     assign wd3 = (isJAL || isJALR) ? pcplus4 :
                  isLUI ? Uimm :
-                 isAUIPC ? aluOut : 
+                 isAUIPC ? pcplusImm : 
                  aluOut;
 
 endmodule
