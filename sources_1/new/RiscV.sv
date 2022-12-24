@@ -2,7 +2,8 @@
  
 module RiscV(
     input logic clk, reset,
-    output logic [31:0] pc, instr, memWdata, addr,
+    output logic [31:0] pc, instr, memWdata, addr, aluIn1, aluIn2, Simm,
+    output logic [4:0] rs1Id, rs2Id, rdId,
     output logic isALUreg, 
         regWrite,
         isJAL,
@@ -12,10 +13,11 @@ module RiscV(
         isAUIPC,
         isALUimm,
         isLoad, 
-        isStore
+        isStore,
+        isShamt
 );
 
-    logic isALUreg, regWrite, isZero, isShamt;
+    logic isALUreg, regWrite, isZero;
 
     logic [2:0] funct3;
     logic [6:0] funct7;
@@ -68,6 +70,10 @@ module RiscV(
         pc,
         addr,
         memWdata,
+        aluIn1, 
+        aluIn2,
+        Simm,
+        rs1Id, rs2Id, rdId,
         memWMask,
         isZero
     );

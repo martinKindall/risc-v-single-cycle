@@ -3,7 +3,8 @@
 module RiscV_TB;
 
     logic clk, reset;
-    logic [31:0] instr, memWdata, addr, pc;
+    logic [31:0] instr, memWdata, addr, pc, aluIn1, aluIn2, Simm;
+    logic [4:0] rs1Id, rs2Id, rdId;
     logic isALUreg, 
         regWrite,
         isJAL,
@@ -13,11 +14,16 @@ module RiscV_TB;
         isAUIPC,
         isALUimm,
         isLoad, 
-        isStore;
+        isStore,
+        isShamt;
 
     RiscV dut(
         clk, reset,
-        pc, instr, memWdata, addr,
+        pc, instr, memWdata, addr, 
+        aluIn1, 
+        aluIn2,
+        Simm,
+        rs1Id, rs2Id, rdId,
         isALUreg, 
         regWrite,
         isJAL,
@@ -27,7 +33,8 @@ module RiscV_TB;
         isAUIPC,
         isALUimm,
         isLoad, 
-        isStore
+        isStore,
+        isShamt
     );
 
     initial begin

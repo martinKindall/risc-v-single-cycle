@@ -5,33 +5,24 @@ module Datapath(
     input logic [2:0] funct3,
     input logic [3:0] aluControl,
     input logic [31:0] instr, memRdata,
-    output logic [31:0] pc, aluOut, memWdata,
+    output logic [31:0] pc, aluOut, memWdata, aluIn1, aluIn2, Simm,
+    output logic [4:0] rs1Id, rs2Id, rdId,
     output logic [3:0] memWMask,
     output logic isZero
 );
     logic [1:0] memByteAccess, memHalfwordAccess;
     logic [7:0] loadByte;
     logic [15:0] loadHalfword;
-    logic [31:0] pcNext, pcplus4, pcplusImm, aluIn1, aluIn2, aluIn2Pre, rd1, rd2, wd3, loadData;
+    logic [31:0] pcNext, pcplus4, pcplusImm, aluIn2Pre, rd2, wd3, loadData;
 
-    logic [4:0] rs1Id = instr[19:15];
-    logic [4:0] rs2Id = instr[24:20];
-    logic [4:0] rdId  = instr[11:7];
-
-    logic [31:0] Uimm = {    instr[31],   instr[30:12], {12{1'b0}}};
-    logic [31:0] Iimm = {{21{instr[31]}}, instr[30:20]};
-    logic [31:0] Simm = {{21{instr[31]}}, instr[30:25],instr[11:7]};
-    logic [31:0] Bimm = {{20{instr[31]}}, instr[7],instr[30:25],instr[11:8],1'b0};
-    logic [31:0] Jimm = {{12{instr[31]}}, instr[19:12],instr[20],instr[30:21],1'b0};
-
-    logic [4:0] shamt = isALUreg ? rd2[4:0] : instr[24:20];
-    
-    logic loadSign = !funct3[2] & (memByteAccess ? loadByte[7] : loadHalfword[15]);
+    logic [31:0] Uimm, Iimm, Bimm, Jimm;
+    logic [4:0] shamt;
+    logic loadSign;
 
     FlopR pcreg(clk, reset, pcNext, pc);
     Adder pcadd1(pc, 32'b100, pcplus4);
 
-    RegisterFile regF(clk, regWrite, rs1Id, rs2Id, rdId, wd3, rd1, rd2);
+    RegisterFile regF(clk, regWrite, rs1Id, rs2Id, rdId, wd3, aluIn1, rd2);
 
     Alu alu(aluControl, aluIn1, aluIn2, aluOut, isZero);
 
@@ -69,7 +60,6 @@ module Datapath(
                              instr[4] ? Uimm[31:0] :
                              Bimm[31:0]);
 
-    assign aluIn1 = rd1;
     assign aluIn2Pre = (isALUreg | isBranch) ? rd2 :
                        isStore ? Simm :
                        Iimm;
@@ -84,5 +74,18 @@ module Datapath(
                  isAUIPC ? pcplusImm : 
                  isLoad ? loadData :
                  aluOut;
+                 
+    assign rs1Id = instr[19:15];
+    assign rs2Id = instr[24:20];
+    assign rdId  = instr[11:7];
+
+    assign Uimm = {    instr[31],   instr[30:12], {12{1'b0}}};
+    assign Iimm = {{21{instr[31]}}, instr[30:20]};
+    assign Simm = {{21{instr[31]}}, instr[30:25],instr[11:7]};
+    assign Bimm = {{20{instr[31]}}, instr[7],instr[30:25],instr[11:8],1'b0};
+    assign Jimm = {{12{instr[31]}}, instr[19:12],instr[20],instr[30:21],1'b0};
+
+    assign shamt = isALUreg ? rd2[4:0] : instr[24:20];
+    assign loadSign = !funct3[2] & (memByteAccess ? loadByte[7] : loadHalfword[15]);
 
 endmodule

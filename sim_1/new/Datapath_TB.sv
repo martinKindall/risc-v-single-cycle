@@ -9,7 +9,7 @@ module Datapath_TB;
     logic [2:0] funct3;
     logic [3:0] aluControl;
     logic [31:0] instr, memRdata;
-    logic [31:0] pc, aluOut, memWdata;
+    logic [31:0] pc, aluOut, memWdata, aluIn1, aluIn2;
     logic [3:0] memWMask;
     logic isZero;
 
@@ -20,7 +20,7 @@ module Datapath_TB;
         isJALR, isBranch, isLUI, isAUIPC, 
         isLoad, isStore, isShamt,
         funct3, aluControl, instr, memRdata,
-        pc, aluOut, memWdata, memWMask, isZero);
+        pc, aluOut, memWdata, aluIn1, aluIn2, memWMask, isZero);
 
     initial begin
         counter = 0;
