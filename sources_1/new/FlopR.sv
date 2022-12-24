@@ -7,7 +7,7 @@ module FlopR(
     
     always_ff @(posedge clk)
         if (reset)
-            q <= 0;
+            q <= 32'b0;
         else
             q <= d;
     

@@ -1,20 +1,27 @@
 `timescale 1ns / 1ps
-
+ 
 module RiscV(
-    input logic clk, reset
+    input logic clk, reset,
+    output logic [31:0] pc, instr, memWdata, addr,
+    output logic isALUreg, 
+        regWrite,
+        isJAL,
+        isJALR,
+        isBranch,
+        isLUI,
+        isAUIPC,
+        isALUimm,
+        isLoad, 
+        isStore
 );
 
-    logic isALUreg, regWrite, 
-        isJAL, isJALR, isBranch,
-        isLUI, isAUIPC, isLoad, 
-        isStore, isZero, isShamt,
-        isALUimm;
+    logic isALUreg, regWrite, isZero, isShamt;
 
     logic [2:0] funct3;
     logic [6:0] funct7;
 
     logic [3:0] memWMask, aluControl;
-    logic [31:0] pc, instr, addr, memWdata, memRdata;
+    logic [31:0] memRdata;
 
     Decoder decoder(
         instr,
@@ -64,7 +71,7 @@ module RiscV(
         isZero
     );
 
-    IMemory imem(pc, instr);
+    IMemory imem(pc[9:2], instr);
     DMemory dmem(
         clk, 
         memWMask,
