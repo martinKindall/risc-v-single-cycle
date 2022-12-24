@@ -1,8 +1,8 @@
 `timescale 1ns / 1ps
 
 module Decoder(
-    input logic [31:0] inst,
-    output logic isALUreg, regWrite, isJAL, isJALR, isBranch, isLUI, isAUIPC, isALUimm, isJAL,
+    input logic [31:0] instr,
+    output logic isALUreg, regWrite, isJAL, isJALR, isBranch, isLUI, isAUIPC, isALUimm,
     output logic isLoad, isStore
 );
 

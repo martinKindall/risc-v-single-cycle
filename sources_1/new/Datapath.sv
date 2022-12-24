@@ -1,7 +1,8 @@
 
 module Datapath(
     input logic clk, reset,
-    input logic isALUreg, regWrite, isJAL, isJALR, isBranch, isLUI, isAUIPC, isLoad, isStore,
+    input logic isALUreg, regWrite, isJAL, isJALR, isBranch, isLUI, isAUIPC, isLoad, isStore, isShamt,
+    input logic [2:0] funct3,
     input logic [3:0] aluControl,
     input logic [31:0] instr, memRdata,
     output logic [31:0] pc, aluOut, memWdata,
@@ -17,9 +18,6 @@ module Datapath(
     logic [4:0] rs2Id = instr[24:20];
     logic [4:0] rdId  = instr[11:7];
 
-    logic [2:0] funct3 = instr[14:12];
-    logic [6:0] funct7 = instr[31:25];
-
     logic [31:0] Uimm = {    instr[31],   instr[30:12], {12{1'b0}}};
     logic [31:0] Iimm = {{21{instr[31]}}, instr[30:20]};
     logic [31:0] Simm = {{21{instr[31]}}, instr[30:25],instr[11:7]};
@@ -32,8 +30,6 @@ module Datapath(
 
     FlopR pcreg(clk, reset, pcNext, pc);
     Adder pcadd1(pc, 32'b100, pcplus4);
-    // mux here? to select either PC or JUMP
-    // also compute the BRANCH and JUMP addresses, TODO (see how is it done in the guide first)
 
     RegisterFile reg(clk, regWrite, rs1Id, rs2Id, rdId, wd3, rd1, rd2);
 
@@ -79,7 +75,7 @@ module Datapath(
                        Iimm;
     assign aluIn2 = isShamt ? shamt : aluIn2Pre;
 
-    assign pcNext = (isBranch && ~isZero || isJAL) ? pcplusImm :
+    assign pcNext = (isBranch && !isZero || isJAL) ? pcplusImm :
                     isJALR ? {aluOut[31:1],1'b0}:
                     pcplus4;
 

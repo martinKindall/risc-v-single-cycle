@@ -2,7 +2,7 @@
 module AluDecoder(
     input logic [2:0] funct3,
     input logic [6:0] funct7,
-    input logic instr_5, isBranch, isALUreg, isAUIPC, isALUimm, isJAL
+    input logic instr_5, isBranch, isALUreg, isALUimm,
     output logic [3:0] aluControl,
     output logic isShamt
 );
