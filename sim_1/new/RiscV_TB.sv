@@ -51,7 +51,7 @@ module RiscV_TB;
     end
 
     always @(negedge clk) begin
-        if (isALUreg) begin
+        if (rdId == 4'h7) begin
             $finish;
         end
     end
