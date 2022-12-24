@@ -3,8 +3,9 @@
 module RiscV_TB;
 
     logic clk, reset;
-    logic [31:0] instr, memWdata, addr, pc, aluIn1, aluIn2, Simm;
+    logic [31:0] instr, memWdata, addr, pc, aluIn1, aluIn2, Simm, memRdata;
     logic [4:0] rs1Id, rs2Id, rdId;
+    logic [3:0] memWMask;
     logic isALUreg, 
         regWrite,
         isJAL,
@@ -23,7 +24,9 @@ module RiscV_TB;
         aluIn1, 
         aluIn2,
         Simm,
+        memRdata,
         rs1Id, rs2Id, rdId,
+        memWMask,
         isALUreg, 
         regWrite,
         isJAL,
@@ -48,7 +51,7 @@ module RiscV_TB;
     end
 
     always @(negedge clk) begin
-        if (isStore) begin
+        if (isALUreg) begin
             $finish;
         end
     end

@@ -11,6 +11,7 @@ module Datapath(
     output logic isZero
 );
     logic [1:0] memByteAccess, memHalfwordAccess;
+    logic [3:0] storeWMask;
     logic [7:0] loadByte;
     logic [15:0] loadHalfword;
     logic [31:0] pcNext, pcplus4, pcplusImm, aluIn2Pre, rd2, wd3, loadData;
@@ -63,7 +64,7 @@ module Datapath(
     assign aluIn2Pre = (isALUreg | isBranch) ? rd2 :
                        isStore ? Simm :
                        Iimm;
-    assign aluIn2 = isShamt ? shamt : aluIn2Pre;
+    assign aluIn2 = isShamt ? {{27{0}}, shamt} : aluIn2Pre;
 
     assign pcNext = (isBranch && !isZero || isJAL) ? pcplusImm :
                     isJALR ? {aluOut[31:1],1'b0}:
