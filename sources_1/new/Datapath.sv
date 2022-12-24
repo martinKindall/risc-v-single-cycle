@@ -31,17 +31,17 @@ module Datapath(
     FlopR pcreg(clk, reset, pcNext, pc);
     Adder pcadd1(pc, 32'b100, pcplus4);
 
-    RegisterFile reg(clk, regWrite, rs1Id, rs2Id, rdId, wd3, rd1, rd2);
+    RegisterFile regF(clk, regWrite, rs1Id, rs2Id, rdId, wd3, rd1, rd2);
 
     Alu alu(aluControl, aluIn1, aluIn2, aluOut, isZero);
 
     assign memByteAccess     = funct3[1:0] == 2'b00;
     assign memHalfwordAccess = funct3[1:0] == 2'b01;
 
-    assign [15:0] loadHalfword =
+    assign loadHalfword =
             aluOut[1] ? memRdata[31:16] : memRdata[15:0];
 
-    assign [7:0] loadByte =
+    assign loadByte =
             aluOut[0] ? loadHalfword[15:8] : loadHalfword[7:0];
 
     assign loadData = memByteAccess ? {{24{loadSign}},     loadByte} :

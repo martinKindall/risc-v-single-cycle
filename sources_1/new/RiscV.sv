@@ -1,8 +1,7 @@
 `timescale 1ns / 1ps
 
 module RiscV(
-    input logic clk, reset,
-    output logic 
+    input logic clk, reset
 );
 
     logic isALUreg, regWrite, 
