@@ -61,6 +61,7 @@ module RiscV(
         isLoad,
         isStore,
         isShamt,
+        funct3,
         aluControl,
         instr,
         memRdata,
