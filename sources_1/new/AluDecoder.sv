@@ -23,12 +23,11 @@ module AluDecoder(
             5'b10101: aluControl <= 4'hc;
             5'b10110: aluControl <= 4'h4;
             5'b10111: aluControl <= 4'hd;
-            default: aluControl <= 4'hf;   // undefined
+            default: aluControl <= 4'h0;  // adder by default
         endcase
         case({isALUreg || isALUimm, funct3})
             4'b1001, 4'b1101: isShamt <= 1'b1;
             default: isShamt <= 1'b0;
         endcase
     end
-
 endmodule
