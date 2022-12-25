@@ -4,7 +4,7 @@ module RiscV_TB;
 
     logic clk, reset;
     logic [31:0] instr, memWdata, addr, pc, aluIn1, aluIn2, Simm, Jimm, memRdata;
-    logic [4:0] rs1Id, rs2Id, rdId;
+    logic [4:0] rs1Id, rs2Id, rdId, leds;
     logic [3:0] memWMask;
     logic isALUreg, 
         regWrite,
@@ -38,7 +38,8 @@ module RiscV_TB;
         isALUimm,
         isLoad, 
         isStore,
-        isShamt
+        isShamt,
+        leds
     );
 
     initial begin

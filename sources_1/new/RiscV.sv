@@ -15,10 +15,11 @@ module RiscV(
         isALUimm,
         isLoad, 
         isStore,
-        isShamt
+        isShamt,
+    output logic [4:0] leds
 );
 
-    logic isALUreg, regWrite, isZero;
+    logic isALUreg, regWrite, isZero, isIO, isRAM;
 
     logic [2:0] funct3;
     logic [6:0] funct7;
@@ -82,13 +83,17 @@ module RiscV(
     IMemory imem(pc[9:2], instr);
     DMemory dmem(
         clk, 
-        memWMask,
+        {{4{isRAM}} & memWMask},
         addr,
         memWdata,
         memRdata
     );
 
+    IODriver io(clk, addr, memWdata, isIO, leds);
+
     assign funct3 = instr[14:12];
     assign funct7 = instr[31:25];
+
+    assign isRAM = !isIO;
 
 endmodule
