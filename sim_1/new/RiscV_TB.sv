@@ -3,9 +3,9 @@
 module RiscV_TB;
 
     logic clk, reset, ledFlag;
-    logic [31:0] instr, memWdata, addr, pc, aluIn1, aluIn2, Simm, Jimm, memRdata;
+    logic [31:0] instr, memWdata, addr, pc, aluIn1, aluIn2, Simm, Jimm, Bimm, Iimm, memRdata;
     logic [4:0] rs1Id, rs2Id, rdId, leds;
-    logic [3:0] memWMask;
+    logic [3:0] memWMask, aluControl;
     logic isALUreg, 
         regWrite,
         isJAL,
@@ -25,9 +25,12 @@ module RiscV_TB;
         aluIn2,
         Simm,
         Jimm,
+        Bimm, 
+        Iimm,
         memRdata,
         rs1Id, rs2Id, rdId,
         memWMask,
+        aluControl,
         isALUreg, 
         regWrite,
         isJAL,
@@ -56,7 +59,7 @@ module RiscV_TB;
     always @(negedge clk) begin
         if (pc == 8'h2c && leds == 5'he)
             ledFlag = 1;
-        if (rdId == 4'ha && addr == 8'h36 && ledFlag) begin
+        if (rdId == 8'h1e && addr == 8'h36 && ledFlag) begin
             $finish;
         end
     end

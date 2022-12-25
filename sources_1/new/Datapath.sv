@@ -5,7 +5,7 @@ module Datapath(
     input logic [2:0] funct3,
     input logic [3:0] aluControl,
     input logic [31:0] instr, memRdata,
-    output logic [31:0] pc, aluOut, memWdata, aluIn1, aluIn2, Simm, Jimm,
+    output logic [31:0] pc, aluOut, memWdata, aluIn1, aluIn2, Simm, Jimm, Bimm, Iimm,
     output logic [4:0] rs1Id, rs2Id, rdId,
     output logic [3:0] memWMask,
     output logic isZero
@@ -16,7 +16,7 @@ module Datapath(
     logic [15:0] loadHalfword;
     logic [31:0] pcNext, pcplus4, pcplusImm, aluIn2Pre, rd2, wd3, loadData;
 
-    logic [31:0] Uimm, Iimm, Bimm;
+    logic [31:0] Uimm;
     logic [4:0] shamt;
     logic loadSign;
 

@@ -7,7 +7,7 @@ module IMemory(
     logic [31:0] ROM[255:0];
 
     initial
-        $readmemb("imemfile.dat", ROM);
+        $readmemh("imemfile.dat", ROM);
 
     assign rd = ROM[a];
 
