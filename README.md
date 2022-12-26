@@ -38,6 +38,8 @@ Note that I had to clone the repo and compile my code inside this path:
 
     riscv64-unknown-elf-ld -o imemfile.bram.elf -T bram.ld -m elf32lriscv -nostdlib --no-relax
 
+    make imemfile.bram.hex
+
 You can increase the space of BRAM assigned to the program, just change the length specified in the _bram.ld_ file.
 
 The Makefiles where throwing some errors at the beginning, but I solved those by doing a __replace all__ of the following environment variables in the repo:
