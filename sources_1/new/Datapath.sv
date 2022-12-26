@@ -11,7 +11,6 @@ module Datapath(
     output logic isZero
 );
     logic [1:0] memByteAccess, memHalfwordAccess;
-    logic [3:0] storeWMask;
     logic [7:0] loadByte;
     logic [15:0] loadHalfword;
     logic [31:0] pcNext, pcplus4, pcplusImm, aluIn2Pre, rd2, wd3, loadData;
@@ -46,7 +45,7 @@ module Datapath(
     assign memWdata[31:24] = aluOut[0] ? rd2[7:0]  :
                     aluOut[1] ? rd2[15:8] : rd2[31:24]; 
 
-    assign storeWMask = memByteAccess ?
+    assign memWMask = memByteAccess ?
 	            (aluOut[1] ?
 		          (aluOut[0] ? 4'b1000 : 4'b0100) :
 		          (aluOut[0] ? 4'b0010 : 4'b0001)
@@ -54,8 +53,6 @@ module Datapath(
 	      memHalfwordAccess ?
 	            (aluOut[1] ? 4'b1100 : 4'b0011) :
               4'b1111;
-
-    assign memWMask = {4{(isStore)}} & storeWMask;
 
     assign pcplusImm = pc + (instr[3] ? Jimm[31:0] :
                              instr[4] ? Uimm[31:0] :
