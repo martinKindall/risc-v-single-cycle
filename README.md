@@ -28,21 +28,4 @@ The top module is _RiscVTop.sv_, which includes the wiring to the slow clock, th
 
 ## Programming using the GNU Toolchain
 
-I basically followed the steps mentioned in step 20 [of this tutorial](https://github.com/BrunoLevy/learn-fpga/blob/master/FemtoRV/TUTORIALS/FROM_BLINKER_TO_RISCV/README.md).
-
-Note that I had to clone the repo and compile my code inside this path: 
-
-    cd learn-fpga/FemtoRV/TUTORIALS/FROM_BLINKER_TO_RISCV/FIRMWARE
-    
-    riscv64-unknown-elf-as -march=rv32i -mabi=ilp32 testProgram.S -o testProgram.o
-
-    riscv64-unknown-elf-ld -o imemfile.bram.elf -T bram.ld -m elf32lriscv -nostdlib --no-relax
-
-    make imemfile.bram.hex
-
-You can increase the space of BRAM assigned to the program, just change the length specified in the _bram.ld_ file.
-
-The Makefiles where throwing some errors at the beginning, but I solved those by doing a __replace all__ of the following environment variables in the repo:
-
-    $(ARCH) replaced by rv32i
-    $(ABI) replaced by ilp32
+I documented the steps in [this repository](https://github.com/martinKindall/compile-for-risc-v-gnu).
