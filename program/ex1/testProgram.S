@@ -9,7 +9,7 @@
 
 start:
     li      gp, IO_BASE
-    li      sp, 0x0200
+    li      sp, 0x2000
     addi    t0, zero, 0xE           # t0 = 14
     sw      t0, (0x20)(zero)        # word 8 in memory
     lw      t1, (0x20)(zero)

@@ -1,10 +1,10 @@
 
 module IMemory(
-    input logic [7:0] a,
+    input logic [8:0] a,
     output logic [31:0] rd
 );
 
-    logic [31:0] ROM[255:0];
+    logic [31:0] ROM[511:0];
 
     initial
         $readmemh("imemfile.dat", ROM);

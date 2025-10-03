@@ -2,7 +2,6 @@
 module IODriver(
     input logic clk, reset, enable,
     input logic [31:0] addr, memWdata,
-    output logic isIO,
     output logic [4:0] leds
 );
     localparam IO_LEDS_bit = 0;

@@ -79,7 +79,7 @@ module RiscV(
         isZero
     );
 
-    IMemory imem(pc[9:2], instr);
+    IMemory imem(pc[10:2], instr);
     DMemory dmem(
         clk, 
         {{4{isStore & isRAM}} & memWMask},
@@ -88,7 +88,7 @@ module RiscV(
         memRdata
     );
 
-    IODriver io(clk, reset, {isStore & isIO}, addr, memWdata, isIO, leds);
+    IODriver io(clk, reset, {isStore & isIO}, addr, memWdata, leds);
 
     assign funct3 = instr[14:12];
     assign funct7 = instr[31:25];
