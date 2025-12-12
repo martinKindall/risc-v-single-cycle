@@ -8,6 +8,9 @@ module DMemory(
 
     logic [31:0] RAM[1023:0];
 
+    initial
+        $readmemh("dmemfile.mem", RAM);
+
     always_ff @(posedge clk) begin
         if(memWMask[0]) RAM[a[11:2]][ 7:0 ] <= wd[ 7:0 ];
         if(memWMask[1]) RAM[a[11:2]][15:8 ] <= wd[15:8 ];
