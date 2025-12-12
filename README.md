@@ -29,3 +29,11 @@ The top module is _RiscVTop.sv_, which includes the wiring to the slow clock, th
 ## Programming using the GNU Toolchain
 
 I documented the steps in [this repository](https://github.com/martinKindall/compile-for-risc-v-gnu).
+
+## Running BASIC
+
+Check out this branch https://github.com/martinKindall/risc-v-single-cycle/tree/tiny_basic_plus
+
+I added VGA and Keyboard controller to emulate a BASIC Terminal, based on the code of this repository: 
+
+https://github.com/martinKindall/TinyBasicPlus
