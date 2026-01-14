@@ -4,15 +4,45 @@ module vga_test (
     input  logic        clk,
     input  logic        reset,
     input  logic [11:0] sw,
-    input  logic [11:0] char_write_read_addr,
-    input  logic [7:0]  char_write_data,
+    input  logic [15:0] i_dmem_addr,
+    input  logic [15:0] dmem_data,
     input  logic        char_write_enable,
     input  logic        char_read_enable,
+    input  logic        fbuffer_ctrl,
+    input  logic        fbuffer_enable,
     output logic        hsync_staged, 
     output logic        vsync_staged,
     output logic [11:0] rgb,         // 12 FPGA pins for RGB(4 per color)
-    output logic [7:0]  r_data_vga_cpu
+    output logic [7:0]  r_data_vga_cpu,
+    output logic copy_pending
 );
+    // fbuffer ctrl 
+    logic [1:0] fbuffer_ctrl_reg;
+    logic [15:0] i_addr_reg;
+
+    always_ff @(posedge clk) begin
+        if (reset) begin
+            fbuffer_ctrl_reg <= 2'b0;
+            copy_pending <= 1'b0;
+            i_addr_reg <= 16'b0;
+        end
+        else if (fbuffer_ctrl) begin
+            fbuffer_ctrl_reg <= dmem_data[1:0];
+
+            if (dmem_data[1] | dmem_data[0]) begin
+                copy_pending <= 1'b1;
+                i_addr_reg <= 16'b0;
+            end
+        end
+
+        if (copy_pending) begin
+            i_addr_reg <= i_addr_reg + 1'b1;
+            
+            if (i_addr_reg == 16'hFFFE)
+                copy_pending <= 1'b0;
+        end
+    end
+
     // stage 0, vga signals
 
     logic        video_on;
@@ -60,9 +90,9 @@ module vga_test (
     char_buffer buffer (
         .clk (clk),
         .reset      (reset),
-        .w_r_address      (char_write_read_addr),
+        .w_r_address      ({i_dmem_addr[11:0]}),
         .r_address      (char_addr),
-        .w_data      (char_write_data),
+        .w_data      (dmem_data[7:0]),
         .w_enable      (char_write_enable),
         .r_enable      (1'b1),
         .r_data_vga      (r_data_vga),
@@ -137,8 +167,83 @@ module vga_test (
         char_addr = char_y * COLS + char_x;
     end
 
-    // end -- char buffer decoding
+    // framebuffer decoding buffer 0
+    logic [15:0] o_data_b_0;    // RGB565
+    logic [11:0] rgb_fbuffer_0; // RGB444
+    logic [11:0] rgb_fbuffer_staged_0;
 
-    assign rgb = video_on_staged ? rgb_staged : 12'b0;
+    always_comb begin
+        rgb_fbuffer_0 = {o_data_b_0[15:12], o_data_b_0[10:7], o_data_b_0[4:1]};   
+    end
+
+    always_ff @(posedge clk) begin
+        if (reset)
+            rgb_fbuffer_staged_0 <= 12'b0;
+        else
+            rgb_fbuffer_staged_0 <= rgb_fbuffer_0;
+    end
+
+    // framebuffer decoding buffer 1
+    logic [15:0] o_data_b_1;    // RGB565
+    logic [11:0] rgb_fbuffer_1; // RGB444
+    logic [11:0] rgb_fbuffer_staged_1;
+
+    always_comb begin
+        rgb_fbuffer_1 = {o_data_b_1[15:12], o_data_b_1[10:7], o_data_b_1[4:1]};   
+    end
+
+    always_ff @(posedge clk) begin
+        if (reset)
+            rgb_fbuffer_staged_1 <= 12'b0;
+        else
+            rgb_fbuffer_staged_1 <= rgb_fbuffer_1;
+    end
+
+    // end
+
+    always_comb begin
+        if (video_on_staged) begin
+            if (fbuffer_ctrl_reg == 2'b00)
+                rgb = rgb_staged;
+            else if (fbuffer_ctrl_reg == 2'b01)
+                rgb = rgb_fbuffer_staged_1;
+            else if (fbuffer_ctrl_reg == 2'b10)
+                rgb = rgb_fbuffer_staged_0;
+            else
+                rgb = 12'b0;
+        end else 
+            rgb = 12'b0;
+    end
+
+    logic [15:0] i_addr_a;
+    logic [15:0] o_data_a_0, i_data_a_0;
+    logic [15:0] o_data_a_1, i_data_a_1;
+
+    assign i_addr_a = copy_pending ? i_addr_reg[15:1] : i_dmem_addr[15:1];
+
+    assign i_data_a_0 = fbuffer_ctrl_reg == 2'b01 ? (copy_pending ? o_data_a_1 : dmem_data) : 16'b0;
+    assign i_data_a_1 = fbuffer_ctrl_reg == 2'b10 ? (copy_pending ? o_data_a_0 : dmem_data) : 16'b0;
+
+    FrameBuffer_ctrl fbuf_0 (
+        .clk(clk),
+        .i_enable_w_a((fbuffer_enable | copy_pending) & fbuffer_ctrl_reg[0]),
+        .x(x),
+        .y(y),
+        .i_addr_a(i_addr_a),
+        .i_data_a(i_data_a_0),
+        .o_data_a(o_data_a_0),
+        .o_data_b(o_data_b_0)
+    );
+
+    FrameBuffer_ctrl fbuf_1 (
+        .clk(clk),
+        .i_enable_w_a((fbuffer_enable | copy_pending) & fbuffer_ctrl_reg[1]),
+        .x(x),
+        .y(y),
+        .i_addr_a(i_addr_a),
+        .i_data_a(i_data_a_1),
+        .o_data_a(o_data_a_1),
+        .o_data_b(o_data_b_1)
+    );
 
 endmodule

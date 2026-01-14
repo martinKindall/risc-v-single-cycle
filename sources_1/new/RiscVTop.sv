@@ -1,17 +1,21 @@
 `timescale 1ns / 1ps
 
 module RiscVTop(
-   input logic clk, slow_clk, reset,
+   input logic clk, slow_clk, reset, spi_ack, vga_copy_pending,
    input logic [15:0] keyboard_data,
    input logic [7:0] r_data_vga_cpu,
+   input logic [31:0] spi_data, millis_counter,
    output logic [6:0] led_segment,
    output logic [3:0] anode_activate,
    output logic dp,
-   output logic [11:0] char_write_read_addr,
-   output logic [7:0] char_write_data,
+   output logic [21:0] o_dmem_addr,
+   output logic [15:0] dmem_data,
    output logic char_write_enable,
    output logic char_read_enable,
-   output logic keyboard_clear_on_read     
+   output logic keyboard_clear_on_read,
+   output logic spi_enable,     
+   output logic fbuffer_ctrl,
+   output logic fbuffer_enable
 );
 
     logic [4:0] leds;
@@ -40,7 +44,7 @@ module RiscVTop(
         .anode_activate(anode_activate),
         .dp(dp));
 
-    RiscV riscv(slow_clk, reset, keyboard_data, r_data_vga_cpu, pc, instr, memWdata, addr, aluIn1, aluIn2, Simm, Jimm, Bimm, Iimm, memRdata, rs1Id, rs2Id, rdId, memWMask, aluControl,
+    RiscV riscv(slow_clk, reset, spi_ack, vga_copy_pending, keyboard_data, r_data_vga_cpu, spi_data, millis_counter, pc, instr, memWdata, addr, aluIn1, aluIn2, Simm, Jimm, Bimm, Iimm, memRdata, rs1Id, rs2Id, rdId, memWMask, aluControl,
         isALUreg, 
         regWrite,
         isJAL,
@@ -54,11 +58,14 @@ module RiscVTop(
         isShamt,
         leds,
         short_segments,
-        char_write_read_addr,
-        char_write_data,
+        o_dmem_addr,
+        dmem_data,
         char_write_enable,
         char_read_enable,
-        keyboard_clear_on_read
+        keyboard_clear_on_read,
+        spi_enable,
+        fbuffer_ctrl,
+        fbuffer_enable
     );
 
     assign displayed_number = short_segments;

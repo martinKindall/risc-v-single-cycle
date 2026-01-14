@@ -10,7 +10,10 @@ module TopM(
     input  logic [11:0] sw,
     output logic        hsync_staged, 
     output logic        vsync_staged,
-    output logic [11:0] rgb         // 12 FPGA pins for RGB(4 per color)     
+    output logic [11:0] rgb,         // 12 FPGA pins for RGB(4 per color)
+    //spi
+    output logic o_spi_cs_n,
+    inout  logic [3:0] qspi_d
 );
     logic slow_clk;
     logic clk_locked;
@@ -22,8 +25,8 @@ module TopM(
         .locked(clk_locked)
     );
 
-    logic [11:0] char_write_read_addr;
-    logic [7:0] char_write_data;
+    logic [21:0] dmem_addr;
+    logic [15:0] dmem_data;
     logic [7:0] r_data_vga_cpu;
     logic char_write_enable;
     logic char_read_enable;
@@ -41,6 +44,14 @@ module TopM(
             keyboard_data_ready_r <= 1'b1;
     end
 
+    // Spi driver
+    logic i_spi_enable, i_spi_release = 0;
+    logic o_spi_ack;
+    logic [31:0] o_spi_data, millis_counter;
+
+    // Framebuffer control
+    logic fbuffer_ctrl, fbuffer_enable, vga_copy_pending;
+
     RiscVTop risc(
         .clk(clk),
         .slow_clk(slow_clk),
@@ -50,25 +61,35 @@ module TopM(
         .led_segment(led_segment),
         .anode_activate(anode_activate),
         .dp(dp),
-        .char_write_read_addr(char_write_read_addr),
-        .char_write_data(char_write_data),
+        .o_dmem_addr(dmem_addr),
+        .dmem_data(dmem_data),
         .char_write_enable(char_write_enable),
         .char_read_enable(char_read_enable),
-        .keyboard_clear_on_read(keyboard_clear_on_read)
+        .keyboard_clear_on_read(keyboard_clear_on_read),
+        .spi_enable(i_spi_enable),
+        .fbuffer_ctrl(fbuffer_ctrl),
+        .fbuffer_enable(fbuffer_enable),
+        .spi_ack(o_spi_ack),
+        .spi_data(o_spi_data),
+        .millis_counter(millis_counter),
+        .vga_copy_pending(vga_copy_pending)
     );
 
     vga_test vga(
         .clk(slow_clk),
         .reset(reset3 | ~clk_locked),
         .sw(sw),
-        .char_write_read_addr(char_write_read_addr),
-        .char_write_data(char_write_data),
+        .i_dmem_addr({dmem_addr[15:0]}),
+        .dmem_data(dmem_data),
         .char_write_enable(char_write_enable),
         .char_read_enable(char_read_enable),
         .hsync_staged(hsync_staged),
         .vsync_staged(vsync_staged),
         .rgb(rgb),
-        .r_data_vga_cpu(r_data_vga_cpu)
+        .r_data_vga_cpu(r_data_vga_cpu),
+        .fbuffer_ctrl(fbuffer_ctrl),
+        .fbuffer_enable(fbuffer_enable),
+        .copy_pending(vga_copy_pending)
     );
 
     logic on_shift;
@@ -81,6 +102,26 @@ module TopM(
         .scancode(scancode_filtered),
         .oflag(keyboard_data_ready),
         .on_shift(on_shift)
+    );
+
+    spiTop spi(
+        .clk(clk),
+        .i_clk(slow_clk),
+        .i_reset(reset4 | ~clk_locked),
+        .i_spi_enable(i_spi_enable),
+        .i_spi_release(i_spi_release),
+        .i_dmem_addr(dmem_addr),
+        .i_dmem_data(dmem_data[9:0]),
+        .o_spi_ack(o_spi_ack),
+        .o_spi_data(o_spi_data),
+        .o_spi_cs_n(o_spi_cs_n),
+        .qspi_d(qspi_d)
+    );
+
+    Millis_counter millis(
+        .clk_25_mhz(slow_clk),
+        .rst(reset2 | ~clk_locked),
+        .millis(millis_counter)
     );
 
     assign keyboard_data = {6'b0, keyboard_data_ready_r, on_shift, scancode_filtered};
