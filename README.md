@@ -45,13 +45,16 @@ https://github.com/martinKindall/TinyBasicPlus
 Check out this branch -> [gif_player](https://github.com/martinKindall/risc-v-single-cycle/tree/gif_player)
 
 
-Components added:
+### Components added:
 - Double Framebuffer backed up by BRAM.
-  - Size: 64 KBytes. Supports 16 bit color: __RGB565__, but in reality only 12 bits are used because Basys3 support limit.
+  - Size: 64 KBytes per buffer. Supports 16 bit color: __RGB565__, but in reality only 12 bits are used because Basys3 support limit.
 - QSPI driver to read files stored on the serial flash of my FPGA (Basys3).
-- The gif tested is the same one being displayed here, a resized version of dramatic chipmunk of about 860 KBytes, with dimensions 195 x 146.
 
 To display GIF's I used the library [AnimatedGIF](https://github.com/martinKindall/AnimatedGIF/tree/riscv_port/examples/riscv-32i) 
 
 I added the QSPI library from this project: 
 https://github.com/ZipCPU/qspiflash/blob/master/rtl/qflexpress.v
+
+### Notes:
+- The gif tested is the same one being displayed here, a resized version of dramatic chipmunk of about 860 KBytes, with dimensions 195 x 146.
+- The CPU is running at 25 Mhz. I could not overclock it more due to its single cycle nature, meaning, the performance reached with the current setup is __4 FPS__. There is room for optimization though.
